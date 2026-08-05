@@ -428,110 +428,130 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
           const SizedBox(height: 24),
 
           // Golden Boot & Card Predictor Row (responsive)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth < 700) {
-                return Column(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 700) {
+                  return Column(
+                    children: [
+                      HoverScaleWidget(
+                        child: GoldenBootDualWidget(
+                          menPick: _goldenBootPickMen,
+                          womenPick: _goldenBootPickWomen,
+                          isLocked: _isBootLocked,
+                          onTapMen: () => _showGoldenBootPicker('M'),
+                          onTapWomen: () => _showGoldenBootPicker('F'),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      HoverScaleWidget(
+                        child: CardPredictorWidget(
+                          yellowCardPick: _yellowCardPick,
+                          redCardPick: _redCardPick,
+                          isLocked: _isBootLocked,
+                          onTapYellow: () => _showCardPicker('yellow'),
+                          onTapRed: () => _showCardPicker('red'),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    HoverScaleWidget(
-                      child: GoldenBootDualWidget(
-                        menPick: _goldenBootPickMen,
-                        womenPick: _goldenBootPickWomen,
-                        isLocked: _isBootLocked,
-                        onTapMen: () => _showGoldenBootPicker('M'),
-                        onTapWomen: () => _showGoldenBootPicker('F'),
+                    Expanded(
+                      child: HoverScaleWidget(
+                        child: GoldenBootDualWidget(
+                          menPick: _goldenBootPickMen,
+                          womenPick: _goldenBootPickWomen,
+                          isLocked: _isBootLocked,
+                          onTapMen: () => _showGoldenBootPicker('M'),
+                          onTapWomen: () => _showGoldenBootPicker('F'),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    HoverScaleWidget(
-                      child: CardPredictorWidget(
-                        yellowCardPick: _yellowCardPick,
-                        redCardPick: _redCardPick,
-                        isLocked: _isBootLocked,
-                        onTapYellow: () => _showCardPicker('yellow'),
-                        onTapRed: () => _showCardPicker('red'),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: HoverScaleWidget(
+                        child: CardPredictorWidget(
+                          yellowCardPick: _yellowCardPick,
+                          redCardPick: _redCardPick,
+                          isLocked: _isBootLocked,
+                          onTapYellow: () => _showCardPicker('yellow'),
+                          onTapRed: () => _showCardPicker('red'),
+                        ),
                       ),
                     ),
                   ],
                 );
-              }
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: HoverScaleWidget(
-                      child: GoldenBootDualWidget(
-                        menPick: _goldenBootPickMen,
-                        womenPick: _goldenBootPickWomen,
-                        isLocked: _isBootLocked,
-                        onTapMen: () => _showGoldenBootPicker('M'),
-                        onTapWomen: () => _showGoldenBootPicker('F'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 0),
-                  Expanded(
-                    child: HoverScaleWidget(
-                      child: CardPredictorWidget(
-                        yellowCardPick: _yellowCardPick,
-                        redCardPick: _redCardPick,
-                        isLocked: _isBootLocked,
-                        onTapYellow: () => _showCardPicker('yellow'),
-                        onTapRed: () => _showCardPicker('red'),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+              },
+            ),
           ),
           const SizedBox(height: 24),
 
           // Stats Row: Leaderboard, Top Scorers, Discipline (responsive)
-          LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth < 900) {
-                return Column(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 900) {
+                  return Column(
+                    children: [
+                      HoverScaleWidget(
+                        child: LeaderboardWidget(
+                          topUsers: _topUsers.take(5).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      HoverScaleWidget(
+                        child: TopScorersWidget(
+                          topMenScorer: _topMenScorer,
+                          topWomenScorer: _topWomenScorer,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      HoverScaleWidget(
+                        child: DisciplineTableWidget(
+                          yellowCardLeaders: _yellowLeaders,
+                          redCardLeaders: _redLeaders,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    HoverScaleWidget(
-                      child: LeaderboardWidget(
-                        topUsers: _topUsers.take(5).toList(),
+                    Expanded(
+                      child: HoverScaleWidget(
+                        child: LeaderboardWidget(
+                          topUsers: _topUsers.take(5).toList(),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    HoverScaleWidget(
-                      child: TopScorersWidget(
-                        topMenScorer: _topMenScorer,
-                        topWomenScorer: _topWomenScorer,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: HoverScaleWidget(
+                        child: TopScorersWidget(
+                          topMenScorer: _topMenScorer,
+                          topWomenScorer: _topWomenScorer,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    HoverScaleWidget(
-                      child: DisciplineTableWidget(
-                        yellowCardLeaders: _yellowLeaders,
-                        redCardLeaders: _redLeaders,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: HoverScaleWidget(
+                        child: DisciplineTableWidget(
+                          yellowCardLeaders: _yellowLeaders,
+                          redCardLeaders: _redLeaders,
+                        ),
                       ),
                     ),
                   ],
                 );
-              }
-              return ManualCarouselWidget(
-                useClick: true, // Click to rotate
-                children: [
-                  LeaderboardWidget(
-                    topUsers: _topUsers.take(5).toList(),
-                  ),
-                  TopScorersWidget(
-                    topMenScorer: _topMenScorer,
-                    topWomenScorer: _topWomenScorer,
-                  ),
-                  DisciplineTableWidget(
-                    yellowCardLeaders: _yellowLeaders,
-                    redCardLeaders: _redLeaders,
-                  ),
-                ],
-              );
-            },
+              },
+            ),
           ),
           const SizedBox(height: 24),
 
