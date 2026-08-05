@@ -4,6 +4,11 @@
 * **App Name:** 1. FCPW Predictor (1. FC Paulaner Wieden Tippspiel)
 * **Target Audience:** Club players and fans (Sunday League / DSG in Vienna).
 * **Primary UI Language:** German.
+* **Scope:** Users predict scores for **FCPW matches only** across three squads:
+  * **KM** (men's first team, ~22 matches/season)
+  * **Reserve** (men's second team, same player pool as KM but separate fixtures, ~22 matches/season)
+  * **Women** (Damen, ~22 matches/season)
+  * Total: ~66 prediction opportunities per season.
 * **Core Goal:** Build a fully automated application that handles fixtures, live results, locking mechanisms, user predictions, and leaderboard calculations automatically to reduce administrative overhead.
 * **Longevity:** The app runs **season after season**. Historical records are kept forever: past leaderboards, past golden-boot outcomes, and a **Hall of Fame** honoring each season's winner.
 
@@ -113,27 +118,30 @@ The app must feature a dark mode aesthetic (Navy Blue `#002d72`, Gold/Yellow `#E
 
 ## 6. Fixture & Result Fetcher Service (Go)
 
-### Decision: fan.at JSON API, not wfv.at scraping, not iCal
-* **wfv.at is not viable for automation:** the site sits behind **Anubis** (proof-of-work anti-bot protection). Plain HTTP clients receive a JS challenge page, not league data. Getting through would require a headless browser and deliberately defeating a bot wall — fragile and unfriendly.
-* **fan.at mirrors the same WFV/DSG data** and exposes an **open, unauthenticated JSON API** (`api.fan.at`) with no bot protection. It carries fixtures, kickoff times, live status, final scores, tables, and rosters. Verified July 2026 for DSG Oberliga A.
+### Decision: fan.at team-scoped JSON API
+* **wfv.at and vereine.oefb.at are not viable:** wfv.at sits behind Anubis (anti-bot wall); vereine.oefb.at has FCPW pages but no iCal exports and requires JS rendering.
+* **fan.at exposes team-scoped endpoints** for FCPW's three squads with an **open, unauthenticated JSON API** (`api.fan.at`). Verified July 2026 for all three FCPW teams.
 
-### Known API surface (verified)
-* League lookup by slug: `GET https://api.fan.at/readable-id/dsg-oberliga-a-w` → league `objectid` (`62c58a64836dc75b348e5e88` for DSG Oberliga A) and its `seasons[]` (e.g. 2026/27 = `6a45b99386c8af017a34ca6a`). **The `seasons[]` list is also how new seasons are detected automatically.**
-* Fixtures/results: `GET https://api.fan.at/v2/events/season/{seasonId}/future/{offset}/{limit}` and `.../past/{offset}/{limit}`. Each event includes `_id`, `teams.home/away` (`name`, `teamid`, `score`), `status` (`upcoming`/live/finished), `round`, and `timestamps` (kickoff).
-* League table: `GET https://api.fan.at/v2/seasons/{seasonId}/tables`.
-* Teams/rosters: `GET https://api.fan.at/leagues/{leagueId}/teams?sorted=true`.
-* Top scorers: endpoint is loaded client-side on the Statistiken page — still to be identified (inspect the XHR calls in a browser). Fallback: aggregate goalscorers from per-event detail data.
-* Each FCPW squad (KM, Reserve, Frauen) plays in its own league → one `season_squads` row per squad per season.
+### FCPW team configuration (fan.at)
+* **KM:** [1-fc-paulaner-wieden.fan.at](https://1-fc-paulaner-wieden.fan.at) → team ID `5f26d8076457523192976cef`
+* **Reserve:** [1-sc-paulaner-wieden-res.fan.at](https://1-sc-paulaner-wieden-res.fan.at) → team ID `5f41648510304553cada7b29`
+* **Women:** [1-fc-paulaner-wieden-damen.fan.at](https://1-fc-paulaner-wieden-damen.fan.at) → team ID `5f26d73964575231929767e8`
+
+### API endpoints (verified)
+* Team lookup: `GET https://api.fan.at/readable-id/{slug}` → team `objectid` and metadata.
+* **Team fixtures/results (FCPW-only):** `GET https://api.fan.at/v2/events/team/{teamId}/future/{offset}/{limit}` and `.../past/{offset}/{limit}`. Each event includes `_id`, `teams.home/away` (`name`, `teamid`, `score`), `status` (`upcoming`/live/finished), `round`, and `timestamps` (kickoff_time in ms since epoch).
+* Rosters (for golden-boot dropdown): derive from team detail or per-match lineup data; top-scorer aggregation may require iterating match events and summing goals by player across the season.
+* Each squad's `season_squads` row stores its team ID in `fanat_league_id` (column name kept for schema consistency; semantics differ from league-wide approach).
 
 ### Worker logic
-1. On each run, for every `season_squads` row of the current season: resolve/cache league & season ids, fetch future + past events.
+1. On each run, for every `season_squads` row of the current season: fetch team future + past events from `api.fan.at/v2/events/team/{fanat_league_id}/...`.
 2. **Upsert** into `matches` keyed on `external_id` (fan.at event `_id`) — inserts new fixtures, updates `kickoff_time` on reschedules, writes scores and `status` on/after match days.
-3. Sync `players` (roster + goal tallies, per season) to keep the golden-boot dropdown and standings current.
-4. Writing a final score triggers the scoring function (§3) via a Postgres trigger or an explicit RPC call.
-5. **Live results:** adaptive polling — a slow baseline (e.g. hourly) that tightens to every 1–2 minutes from kickoff until the event status is `finished`. Kickoff times are known in advance, so the worker can schedule its own tight-poll windows.
-6. **Season rollover:** when fan.at publishes a new season for a tracked league, the worker flags it (or auto-creates the `seasons` + `season_squads` rows). Closing the old season — writing `final_rank`, resolving `golden_boot_hit`, flipping `is_current` — runs as an explicit closing routine once all its matches are finished.
+3. Sync `players` (roster + goal tallies, per season) — derive from match lineup data or team roster endpoint; aggregate goals across all three squads' matches to populate the golden-boot dropdown and determine the season winner.
+4. Writing a final score triggers the scoring function (§3) via the existing Postgres trigger (already in Phase 1 migration).
+5. **Live results:** adaptive polling — a slow baseline (e.g. hourly) that tightens to every 1–2 minutes from 30 min before kickoff until the event status is `finished`. Kickoff times are known in advance, so the worker can schedule its own tight-poll windows per match.
+6. **Season rollover:** manual for now (admin inserts a new `seasons` row + three `season_squads` rows via SQL). Closing the old season — writing `final_rank`, resolving `golden_boot_hit`, flipping `is_current` — is done via the existing `close_season(uuid)` function (Phase 1) once all matches are finished.
 7. Connect to Supabase via the Postgres connection string (`database/sql` + pgx) using the service role, bypassing RLS.
-8. Be a polite client: identify with a UA string, cache season/league ids, back off on errors.
+8. Be a polite client: identify with a UA string, back off on errors, respect fan.at rate limits.
 
 ## 7. Suggested Prompting Roadmap (For LLM Assistant)
 1. **Phase 1: Supabase Setup.** "Write the SQL to create the `users`, `seasons`, `season_squads`, `matches`, `players`, `predictions`, and `user_season_stats` tables with RLS policies that (a) restrict writes to the owner, (b) enforce the 2-hour prediction lock and the golden-boot `boot_lock_time` in the policy itself, and (c) keep all historical seasons readable. Include the signup trigger on `auth.users` (username from metadata) and the Hall-of-Fame view."
