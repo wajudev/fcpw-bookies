@@ -1,0 +1,31 @@
+name: Scrape WFV Matches
+
+on:
+  schedule:
+    # Run every 12 hours (00:00 and 12:00 UTC)
+    - cron: '0 */12 * * *'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  scrape-wfv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: go mod download
+
+      - name: Run WFV scraper
+        working-directory: ./backend
+        run: go run cmd/scrape-wfv/main.go
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

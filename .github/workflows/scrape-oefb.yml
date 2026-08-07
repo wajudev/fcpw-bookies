@@ -1,0 +1,36 @@
+name: Scrape OEFB Standings
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC (after matches typically finish)
+    - cron: '0 2 * * *'
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  scrape-oefb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Install Chromium dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: go mod download
+
+      - name: Run OEFB scraper
+        working-directory: ./backend
+        run: go run cmd/scrape-oefb/main.go
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
