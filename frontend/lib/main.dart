@@ -3,9 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/supabase_config.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+import 'screens/auth/reset_password_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
@@ -21,6 +23,10 @@ void main() async {
 
   // Initialize Supabase
   await SupabaseConfig.initialize();
+
+  // Debug: Check initial session
+  final session = SupabaseConfig.client.auth.currentSession;
+  debugPrint('Initial session: ${session?.user?.email}');
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -57,9 +63,38 @@ class AuthWrapper extends StatefulWidget {
 class _AuthWrapperState extends State<AuthWrapper> {
   final _authService = AuthService();
   bool _showRegister = false;
+  bool _isPasswordRecovery = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    // Listen for auth state changes
+    SupabaseConfig.client.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      debugPrint('Auth event: $event');
+
+      if (event == AuthChangeEvent.passwordRecovery) {
+        debugPrint('Password recovery detected!');
+        if (mounted) {
+          setState(() {
+            _isPasswordRecovery = true;
+          });
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Show reset password screen if recovery token detected
+    if (_isPasswordRecovery) {
+      return const ResetPasswordScreen();
+    }
+
     return StreamBuilder(
       stream: _authService.authStateChanges,
       builder: (context, snapshot) {
@@ -78,7 +113,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
         if (_showRegister) {
           return RegisterScreen(
             onRegisterSuccess: () {
-              // Auto-navigate to home on successful registration
               setState(() {});
             },
             onNavigateToLogin: () {

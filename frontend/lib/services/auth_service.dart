@@ -42,6 +42,10 @@ class AuthService {
     await _supabase.auth.resetPasswordForEmail(email);
   }
 
+  Future<void> updatePassword(String newPassword) async {
+    await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+  }
+
   Future<Map<String, dynamic>?> getUserProfile() async {
     if (!isAuthenticated) return null;
 
