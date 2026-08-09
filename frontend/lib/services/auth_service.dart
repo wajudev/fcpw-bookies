@@ -39,7 +39,10 @@ class AuthService {
   }
 
   Future<void> resetPassword(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
+    await _supabase.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'https://wajudev.github.io/fcpw-bookies',
+    );
   }
 
   Future<void> updatePassword(String newPassword) async {
