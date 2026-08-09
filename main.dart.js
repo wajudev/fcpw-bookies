@@ -95592,7 +95592,7 @@ Ee(a){return this.azl(a)},
 azl(a){var s=0,r=A.A(t.H),q=this
 var $async$Ee=A.B(function(b,c){if(b===1)return A.x(c,r)
 for(;;)switch(s){case 0:s=2
-return A.o(q.a.ge1().xF(a),$async$Ee)
+return A.o(q.a.ge1().xF(a,"https://wajudev.github.io/fcpw-bookies"),$async$Ee)
 case 2:return A.y(null,r)}})
 return A.z($async$Ee,r)},
 Ez(a){return this.aA9(a)},
@@ -97127,7 +97127,9 @@ if(o!=null)k.n(0,"Authorization","Bearer "+A.j(o))
 o=A.p(l,l)
 n=c.f
 if(n!=null)o.M(0,n)
-m=A.dT(a,0,null)
+n=c.d
+if(n!=null){n.toString
+o.n(0,"redirect_to",n)}m=A.dT(a,0,null)
 l=A.cM(m.ghe(),l,t.z)
 l.M(0,o)
 s=3
@@ -97450,15 +97452,15 @@ break
 case 10:case 6:return A.y(null,r)
 case 1:return A.x(p.at(-1),r)}})
 return A.z($async$nC,r)},
-xF(a){return this.azm(a)},
-azm(a){var s=0,r=A.A(t.H),q=this,p,o,n,m
-var $async$xF=A.B(function(b,c){if(b===1)return A.x(c,r)
+xF(a,b){return this.azm(a,b)},
+azm(a,b){var s=0,r=A.A(t.H),q=this,p,o,n,m
+var $async$xF=A.B(function(c,d){if(c===1)return A.x(d,r)
 for(;;)switch(s){case 0:s=2
 return A.o(q.v9("passwordRecovery"),$async$xF)
-case 2:p=c
+case 2:p=d
 o=t.N
 n=A.ac(["captcha_token",null],o,t.T)
-m=A.qz(A.ac(["email",a,"gotrue_meta_security",n,"code_challenge",p,"code_challenge_method",p!=null?"s256":null],o,t.X),q.r,null,null,null,null)
+m=A.qz(A.ac(["email",a,"gotrue_meta_security",n,"code_challenge",p,"code_challenge_method",p!=null?"s256":null],o,t.X),q.r,null,null,null,b)
 s=3
 return A.o(q.gnl().l1(q.f+"/recover",B.i8,m),$async$xF)
 case 3:return A.y(null,r)}})
