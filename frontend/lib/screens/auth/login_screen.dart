@@ -147,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   // Forgot password link
                   Align(
                     alignment: Alignment.centerRight,
@@ -162,7 +162,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       child: const Text(
                         'Passwort vergessen?',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(
+                          color: Color(0xFFEAB308),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),

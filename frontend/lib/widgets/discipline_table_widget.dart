@@ -90,18 +90,38 @@ class DisciplineTableWidget extends StatelessWidget {
 
             // Empty state
             if (yellowCardLeaders.isEmpty && redCardLeaders.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    'No cards yet',
-                    style: TextStyle(
-                      color: Colors.grey.shade400,
-                      fontSize: 14,
-                    ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 80),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.warning_amber_outlined,
+                        size: 48,
+                        color: Colors.grey.shade300,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No cards yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Card leaders will appear here',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+              )
+            else
+              const SizedBox(height: 16),
           ],
         ),
       ),

@@ -62,38 +62,56 @@ class TopScorersWidget extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Men's Top Scorer
-            if (topMenScorer != null) ...[
-              _buildScorerCard(
-                player: topMenScorer!,
-                label: "Men",
-                icon: Icons.male,
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            // Women's Top Scorer
-            if (topWomenScorer != null)
-              _buildScorerCard(
-                player: topWomenScorer!,
-                label: "Women",
-                icon: Icons.female,
-              ),
-
-            // Empty state
+            // Empty state or scorers
             if (topMenScorer == null && topWomenScorer == null)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    'No goals yet',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                    ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 80),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.sports_soccer_outlined,
+                        size: 48,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No goals yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Season scorers will appear here',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
+              )
+            else ...[
+              // Show scorers
+              if (topMenScorer != null) ...[
+                _buildScorerCard(
+                  player: topMenScorer!,
+                  label: "Men",
+                  icon: Icons.male,
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (topWomenScorer != null)
+                _buildScorerCard(
+                  player: topWomenScorer!,
+                  label: "Women",
+                  icon: Icons.female,
+                ),
+              const SizedBox(height: 16),
+            ],
           ],
         ),
       ),

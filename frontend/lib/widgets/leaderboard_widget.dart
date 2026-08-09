@@ -13,8 +13,6 @@ class LeaderboardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (topUsers.isEmpty) return const SizedBox.shrink();
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -61,8 +59,40 @@ class LeaderboardWidget extends StatelessWidget {
               ],
             ),
           ),
-          ...topUsers.take(5).map((user) => _buildUserRow(user)),
-          const SizedBox(height: 8),
+          if (topUsers.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 80),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.emoji_events_outlined,
+                      size: 48,
+                      color: Colors.grey.shade300,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No rankings yet',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Make predictions to earn points!',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ...topUsers.take(5).map((user) => _buildUserRow(user)),
+          const SizedBox(height: 16),
         ],
       ),
     );

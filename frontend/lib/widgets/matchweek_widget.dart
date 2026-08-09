@@ -76,7 +76,7 @@ class MatchweekWidget extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -106,7 +106,7 @@ class MatchweekWidget extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 6),
                             Text(
                               _getDateRange(),
                               style: TextStyle(
@@ -125,7 +125,7 @@ class MatchweekWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   // Matches
                   ...matches.map((match) => _buildMatchRow(match)),
                 ],
@@ -144,8 +144,8 @@ class MatchweekWidget extends StatelessWidget {
     final isFinished = match.status == MatchStatus.finished;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),

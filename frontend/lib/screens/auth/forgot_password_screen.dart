@@ -32,7 +32,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     });
 
     try {
-      await _authService.resetPassword(email: _emailController.text.trim());
+      await _authService.resetPassword(_emailController.text.trim());
 
       if (mounted) {
         setState(() {
@@ -53,7 +53,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundDark,
+      backgroundColor: const Color(0xFF1E293B),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -164,7 +164,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onPressed: _isLoading ? null : _handleResetPassword,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.kmGold,
-              foregroundColor: AppTheme.backgroundDark,
+              foregroundColor: const Color(0xFF1E293B),
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -178,7 +178,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        AppTheme.backgroundDark,
+                        Color(0xFF1E293B),
                       ),
                     ),
                   )
@@ -245,7 +245,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           onPressed: () => Navigator.pop(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.kmGold,
-            foregroundColor: AppTheme.backgroundDark,
+            foregroundColor: const Color(0xFF1E293B),
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
