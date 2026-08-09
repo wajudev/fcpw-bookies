@@ -44,7 +44,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       debugPrint('Reset password error: $e');
 
       setState(() {
-        _errorMessage = 'Fehler beim Senden der E-Mail. Bitte erneut versuchen.';
+        if (e.toString().contains('User not found')) {
+          _errorMessage = 'Diese E-Mail-Adresse ist nicht registriert.';
+        } else if (e.toString().contains('Invalid email')) {
+          _errorMessage = 'Ungültige E-Mail-Adresse.';
+        } else {
+          _errorMessage = 'Fehler beim Senden der E-Mail. Bitte erneut versuchen.\n${e.toString()}';
+        }
         _isLoading = false;
       });
     }
