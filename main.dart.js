@@ -94318,7 +94318,7 @@ $0(){var s,r=this.b,q=J.k7(r)
 if(B.c.q(q.j(r),"User not found")){r=this.a
 r.x="Diese E-Mail-Adresse ist nicht registriert."}else{s=this.a
 if(B.c.q(q.j(r),"Invalid email"))s.x="Ung\xfcltige E-Mail-Adresse."
-else s.x="Fehler beim Senden der E-Mail. Bitte erneut versuchen.\n"+q.j(r)
+else s.x="Fehler beim Senden der E-Mail. Bitte erneut versuchen."
 r=s}r.r=!1},
 $S:0}
 A.ayz.prototype={
