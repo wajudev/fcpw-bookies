@@ -92,41 +92,6 @@ class _LeaderboardScreenFullState extends State<LeaderboardScreenFull> {
                     // Full Leaderboard
                     LeaderboardWidget(topUsers: _topUsers),
                     const SizedBox(height: 24),
-
-                    // Empty state
-                    if (_topUsers.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(40),
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.emoji_events,
-                                size: 64,
-                                color: Colors.grey.shade300,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No rankings yet',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey.shade500,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Make predictions to start earning points!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
