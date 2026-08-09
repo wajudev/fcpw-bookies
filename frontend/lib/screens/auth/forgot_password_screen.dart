@@ -49,7 +49,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         } else if (e.toString().contains('Invalid email')) {
           _errorMessage = 'Ungültige E-Mail-Adresse.';
         } else {
-          _errorMessage = 'Fehler beim Senden der E-Mail. Bitte erneut versuchen.\n${e.toString()}';
+          _errorMessage = 'Fehler beim Senden der E-Mail. Bitte erneut versuchen.';
         }
         _isLoading = false;
       });
