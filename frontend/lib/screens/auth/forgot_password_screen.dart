@@ -40,8 +40,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('Reset password error: $e');
+      debugPrint('Stack trace: $stackTrace');
 
       setState(() {
         if (e.toString().contains('User not found')) {
@@ -49,7 +50,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         } else if (e.toString().contains('Invalid email')) {
           _errorMessage = 'Ungültige E-Mail-Adresse.';
         } else {
-          _errorMessage = 'Fehler beim Senden der E-Mail. Bitte erneut versuchen.';
+          // Show the actual error for debugging
+          _errorMessage = 'Fehler: ${e.toString()}';
         }
         _isLoading = false;
       });
