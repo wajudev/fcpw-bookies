@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../config/supabase_config.dart';
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import 'login_screen.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -35,6 +37,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     try {
       await _authService.updatePassword(_passwordController.text);
+
+      // Sign out immediately to prevent auto-login
+      await SupabaseConfig.client.auth.signOut();
 
       if (mounted) {
         setState(() {
@@ -268,7 +273,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         const SizedBox(height: 40),
         ElevatedButton(
           onPressed: () {
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            // User is already logged out, just reload
+            if (context.mounted) {
+              Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.kmGold,

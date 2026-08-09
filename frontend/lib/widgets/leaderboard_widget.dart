@@ -90,9 +90,10 @@ class LeaderboardWidget extends StatelessWidget {
                 ),
               ),
             )
-          else
+          else ...[
             ...topUsers.take(5).map((user) => _buildUserRow(user)),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
+          ],
         ],
       ),
     );
