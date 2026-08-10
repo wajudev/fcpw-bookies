@@ -61,37 +61,58 @@ class FunStatsSlide extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Stats grid
+          // Stats in rows - 2 stats side by side, non-scrollable
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 1.5,
+            child: Column(
               children: [
-                _buildStatCard(
-                  emoji: '🔥',
-                  label: 'Hot Streak',
-                  value: hotStreak ?? 'Coming soon',
-                  color: Colors.orange,
+                // Top row: Hot & Cold Streak
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          emoji: '🔥',
+                          label: 'Hot Streak',
+                          value: hotStreak ?? 'Coming soon',
+                          color: Colors.orange,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          emoji: '🧊',
+                          label: 'Cold Streak',
+                          value: coldStreak ?? 'Coming soon',
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                _buildStatCard(
-                  emoji: '🧊',
-                  label: 'Cold Streak',
-                  value: coldStreak ?? 'Coming soon',
-                  color: Colors.blue,
-                ),
-                _buildStatCard(
-                  emoji: '👑',
-                  label: 'Current Leader',
-                  value: recentLeader ?? 'Coming soon',
-                  color: AppTheme.kmGold,
-                ),
-                _buildStatCard(
-                  emoji: '📊',
-                  label: 'Biggest Lead',
-                  value: biggestLead != null ? '$biggestLead pts' : 'Coming soon',
-                  color: AppTheme.primaryGreen,
+                const SizedBox(height: 16),
+                // Bottom row: Current Leader & Biggest Lead
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          emoji: '👑',
+                          label: 'Current Leader',
+                          value: recentLeader ?? 'Coming soon',
+                          color: AppTheme.kmGold,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          emoji: '📊',
+                          label: 'Biggest Lead',
+                          value: biggestLead != null ? '$biggestLead pts' : 'Coming soon',
+                          color: AppTheme.primaryGreen,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
