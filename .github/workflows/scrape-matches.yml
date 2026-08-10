@@ -1,4 +1,4 @@
-name: Scrape WFV Matches
+name: Scrape OEFB Matches
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Allow manual trigger from GitHub UI
 
 jobs:
-  scrape-wfv:
+  scrape-oefb:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,9 +23,9 @@ jobs:
         working-directory: ./backend
         run: go mod download
 
-      - name: Run WFV scraper
+      - name: Run OEFB scraper
         working-directory: ./backend
-        run: go run cmd/scrape-wfv/main.go
+        run: go run cmd/scrape-oefb/main.go
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
