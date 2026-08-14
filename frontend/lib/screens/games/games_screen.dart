@@ -5,7 +5,9 @@ import '../../models/player_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/matches_service.dart';
 import '../../services/players_service.dart';
+import '../../services/profile_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/golden_boot_picker.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -20,8 +22,10 @@ class _GamesScreenState extends State<GamesScreen>
   final _authService = AuthService();
   final _matchesService = MatchesService();
   final _playersService = PlayersService();
+  final _profileService = ProfileService();
 
   String? _seasonId;
+  UserProfile? _profile;
   Map<String, List<Match>> _matchesBySquad = {};
   Map<String, Prediction> _predictions = {};
   List<Player> _players = [];
@@ -66,12 +70,14 @@ class _GamesScreenState extends State<GamesScreen>
         await _matchesService.getUserPredictions(userId, seasonId);
     final players = await _playersService.getPlayersForSeason(seasonId);
     final goldenBootPick =
-        await _playersService.getGoldenBootPick(userId, seasonId);
+      await _playersService.getGoldenBootPick(userId, seasonId);
+    final profile = await _profileService.getUserProfile(userId, seasonId);
 
     if (!mounted) return;
 
     setState(() {
       _seasonId = seasonId;
+      _profile = profile;
       _matchesBySquad = {
         'km': kmMatches,
         'reserve': reserveMatches,
@@ -189,17 +195,33 @@ class _GamesScreenState extends State<GamesScreen>
               if (playerId == null || _seasonId == null) return;
               final userId = _authService.currentUser?.id;
               if (userId == null) return;
+              // Show dialog to optionally enter predicted goals
+              final player = players.firstWhere((p) => p.id == playerId);
+              final result = await showDialog<Map<String, dynamic>>(
+                context: context,
+                builder: (context) => GoldenBootPicker(
+                  players: [player],
+                  currentPick: player,
+                  currentGoalsPrediction: _profile?.goldenBootPickCount,
+                ),
+              );
+
+              final predictedGoals = result?['predictedGoals'] as int?;
 
               try {
                 await _playersService.submitGoldenBootPick(
                   userId: userId,
                   seasonId: _seasonId!,
                   playerId: playerId,
+                  gender: player.gender,
+                  predictedGoals: predictedGoals,
                 );
                 setState(() => _goldenBootPick = playerId);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Torschützenkönig-Tipp gespeichert!'),
+                  SnackBar(
+                    content: Text(predictedGoals != null
+                        ? 'Torschützenkönig-Tipp gespeichert ($predictedGoals)!'
+                        : 'Torschützenkönig-Tipp gespeichert!'),
                     backgroundColor: AppTheme.kmGold,
                   ),
                 );

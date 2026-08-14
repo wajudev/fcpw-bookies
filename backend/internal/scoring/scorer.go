@@ -51,11 +51,14 @@ func (s *Scorer) CalculatePoints(pred PredictionResult) ScoringResult {
 		IsExactHit:   false,
 	}
 
-	// PLACEHOLDER LOGIC - Replace with actual rules from document
+	// Scoring rules (as requested):
+	// - Correct outcome (winner/draw) => 1 point
+	// - Correct outcome AND exact score => 2 points (total)
+	// - Wrong prediction => 0 points
 
 	// Exact score match
 	if pred.HomeScorePred == pred.HomeScoreActual && pred.AwayScorePred == pred.AwayScoreActual {
-		result.Points = 3
+		result.Points = 2
 		result.IsExactHit = true
 		return result
 	}

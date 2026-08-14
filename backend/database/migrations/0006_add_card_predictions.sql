@@ -3,6 +3,8 @@
 ALTER TABLE public.user_season_stats
 ADD COLUMN IF NOT EXISTS yellow_card_pick UUID REFERENCES public.players(id),
 ADD COLUMN IF NOT EXISTS red_card_pick UUID REFERENCES public.players(id),
+ADD COLUMN IF NOT EXISTS yellow_card_pick_count INTEGER,
+ADD COLUMN IF NOT EXISTS red_card_pick_count INTEGER,
 ADD COLUMN IF NOT EXISTS yellow_card_hit BOOLEAN,
 ADD COLUMN IF NOT EXISTS red_card_hit BOOLEAN;
 
@@ -10,3 +12,5 @@ COMMENT ON COLUMN public.user_season_stats.yellow_card_pick IS 'User''s predicti
 COMMENT ON COLUMN public.user_season_stats.red_card_pick IS 'User''s prediction for most red cards';
 COMMENT ON COLUMN public.user_season_stats.yellow_card_hit IS 'Did user correctly predict yellow card leader';
 COMMENT ON COLUMN public.user_season_stats.red_card_hit IS 'Did user correctly predict red card leader';
+COMMENT ON COLUMN public.user_season_stats.yellow_card_pick_count IS 'User''s predicted count for most yellow cards';
+COMMENT ON COLUMN public.user_season_stats.red_card_pick_count IS 'User''s predicted count for most red cards';

@@ -93,7 +93,14 @@ create table public.user_season_stats (
   total_points     integer not null default 0,
   exact_hits       integer not null default 0,
   golden_boot_pick uuid references public.players (id),
+  golden_boot_pick_count integer,
   golden_boot_hit  boolean,                      -- resolved by close_season()
+  yellow_card_pick uuid references public.players(id),
+  yellow_card_pick_count integer,
+  yellow_card_hit boolean,
+  red_card_pick uuid references public.players(id),
+  red_card_pick_count integer,
+  red_card_hit boolean,
   final_rank       integer,                      -- frozen by close_season(); NULL while running
   primary key (user_id, season_id)
 );
@@ -162,16 +169,16 @@ begin
   if m.status = 'finished'
      and m.home_score_actual is not null
      and m.away_score_actual is not null then
-    update predictions p
-    set points_awarded = case
-          when p.home_score_guess = m.home_score_actual
-           and p.away_score_guess = m.away_score_actual then 3
-          when sign(p.home_score_guess - p.away_score_guess)
-             = sign(m.home_score_actual - m.away_score_actual) then 1
-          else 0
+     update predictions p
+     set points_awarded = case
+         when p.home_score_guess = m.home_score_actual
+          and p.away_score_guess = m.away_score_actual then 2
+         when sign(p.home_score_guess - p.away_score_guess)
+           = sign(m.home_score_actual - m.away_score_actual) then 1
+         else 0
         end,
         updated_at = now()
-    where p.match_id = p_match_id;
+     where p.match_id = p_match_id;
   else
     -- Result missing or annulled (e.g. reverted to live/upcoming): clear points.
     update predictions
@@ -252,6 +259,66 @@ begin
   where uss.season_id = p_season_id and uss.user_id = r.user_id;
 
   update seasons set is_current = false where id = p_season_id;
+  
+  -- Resolve card/boot leaders and award season bonus points:
+  -- - 2 points if user picked the correct player
+  -- - 4 points if user picked the correct player AND the correct count
+
+  -- Compute top counts (may be NULL if no data)
+  declare
+    top_goals integer;
+    top_yellow integer;
+    top_red integer;
+  begin
+    select max(goals) into top_goals from players where season_id = p_season_id;
+    select max(yellow_cards) into top_yellow from players where season_id = p_season_id;
+    select max(red_cards) into top_red from players where season_id = p_season_id;
+
+    -- Set hit booleans for picks
+    update user_season_stats uss
+    set golden_boot_hit = (uss.golden_boot_pick is not null and exists (
+          select 1 from players p where p.id = uss.golden_boot_pick and p.goals = top_goals and top_goals > 0
+        )),
+        yellow_card_hit = (uss.yellow_card_pick is not null and exists (
+          select 1 from players p where p.id = uss.yellow_card_pick and p.yellow_cards = top_yellow and top_yellow > 0
+        )),
+        red_card_hit = (uss.red_card_pick is not null and exists (
+          select 1 from players p where p.id = uss.red_card_pick and p.red_cards = top_red and top_red > 0
+        ))
+    where uss.season_id = p_season_id;
+
+    -- Award points: 2 for correct pick, 4 if pick_count matches actual count
+    update user_season_stats uss
+    set total_points = total_points
+      + coalesce((
+          select case
+            when uss.golden_boot_pick is null then 0
+            when p.goals = uss.golden_boot_pick_count and p.goals = top_goals and top_goals > 0 then 4
+            when p.goals = top_goals and top_goals > 0 then 2
+            else 0
+          end
+          from players p where p.id = uss.golden_boot_pick
+        ), 0)
+      + coalesce((
+          select case
+            when uss.yellow_card_pick is null then 0
+            when p.yellow_cards = uss.yellow_card_pick_count and p.yellow_cards = top_yellow and top_yellow > 0 then 4
+            when p.yellow_cards = top_yellow and top_yellow > 0 then 2
+            else 0
+          end
+          from players p where p.id = uss.yellow_card_pick
+        ), 0)
+      + coalesce((
+          select case
+            when uss.red_card_pick is null then 0
+            when p.red_cards = uss.red_card_pick_count and p.red_cards = top_red and top_red > 0 then 4
+            when p.red_cards = top_red and top_red > 0 then 2
+            else 0
+          end
+          from players p where p.id = uss.red_card_pick
+        ), 0)
+    where uss.season_id = p_season_id;
+  end;
 end;
 $$;
 
@@ -377,4 +444,13 @@ grant insert (user_id, match_id, home_score_guess, away_score_guess),
 
 grant insert (user_id, season_id, golden_boot_pick),
       update (golden_boot_pick)
+  on public.user_season_stats to authenticated;
+
+-- Allow users to also provide their count guesses for boot/cards and card picks
+grant insert (user_id, season_id, golden_boot_pick, golden_boot_pick_count,
+              yellow_card_pick, yellow_card_pick_count,
+              red_card_pick, red_card_pick_count),
+      update (golden_boot_pick, golden_boot_pick_count,
+              yellow_card_pick, yellow_card_pick_count,
+              red_card_pick, red_card_pick_count)
   on public.user_season_stats to authenticated;
