@@ -20,9 +20,9 @@ class ProfileService {
       }
 
       // Get season stats
-      final statsResponse = await _supabase
+        final statsResponse = await _supabase
           .from('user_season_stats')
-          .select('total_points, exact_hits, final_rank, golden_boot_pick_men, golden_boot_pick_women, yellow_card_pick, red_card_pick, golden_boot_goals_prediction, golden_boot_hit, yellow_card_hit, red_card_hit')
+          .select('total_points, exact_hits, final_rank, golden_boot_pick_men, golden_boot_pick_women, golden_boot_pick_count, yellow_card_pick, yellow_card_pick_count, red_card_pick, red_card_pick_count, golden_boot_hit, yellow_card_hit, red_card_hit')
           .eq('user_id', userId)
           .eq('season_id', seasonId)
           .maybeSingle();
@@ -42,9 +42,11 @@ class ProfileService {
         finalRank: statsResponse?['final_rank'] as int?,
         goldenBootPickMenId: statsResponse?['golden_boot_pick_men'] as String?,
         goldenBootPickWomenId: statsResponse?['golden_boot_pick_women'] as String?,
+        goldenBootPickCount: statsResponse?['golden_boot_pick_count'] as int?,
         yellowCardPickId: statsResponse?['yellow_card_pick'] as String?,
+        yellowCardPickCount: statsResponse?['yellow_card_pick_count'] as int?,
         redCardPickId: statsResponse?['red_card_pick'] as String?,
-        goldenBootGoalsPrediction: statsResponse?['golden_boot_goals_prediction'] as int?,
+        redCardPickCount: statsResponse?['red_card_pick_count'] as int?,
         goldenBootHit: statsResponse?['golden_boot_hit'] as bool?,
         goldenBootHitMen: statsResponse?['golden_boot_hit'] as bool?, // TODO: separate field in DB
         goldenBootHitWomen: false, // TODO: separate field in DB
@@ -100,7 +102,9 @@ class UserProfile {
   final String? goldenBootPickWomenId;
   final String? yellowCardPickId;
   final String? redCardPickId;
-  final int? goldenBootGoalsPrediction;
+  final int? goldenBootPickCount;
+  final int? yellowCardPickCount;
+  final int? redCardPickCount;
   final bool? goldenBootHit;
   final bool? goldenBootHitMen;
   final bool? goldenBootHitWomen;
@@ -117,7 +121,9 @@ class UserProfile {
     this.goldenBootPickWomenId,
     this.yellowCardPickId,
     this.redCardPickId,
-    this.goldenBootGoalsPrediction,
+    this.goldenBootPickCount,
+    this.yellowCardPickCount,
+    this.redCardPickCount,
     this.goldenBootHit,
     this.goldenBootHitMen,
     this.goldenBootHitWomen,
