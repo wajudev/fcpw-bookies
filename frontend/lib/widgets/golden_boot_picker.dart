@@ -283,7 +283,11 @@ class _GoldenBootPickerState extends State<GoldenBootPicker> {
                       ],
                       decoration: InputDecoration(
                         hintText: 'e.g. 15',
-                        suffixText: widget.countLabel != null && widget.countLabel!.toLowerCase().contains('yellow') ? 'Cards' : 'Goals',
+                        suffixText: widget.countLabel != null && 
+                                    (widget.countLabel!.toLowerCase().contains('yellow') || 
+                                     widget.countLabel!.toLowerCase().contains('red') ||
+                                     widget.countLabel!.toLowerCase().contains('goal'))
+                                    ? 'Cards' : 'Goals',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(

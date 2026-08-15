@@ -86,14 +86,16 @@ create table public.predictions (
 create index predictions_match_idx on public.predictions (match_id);
 
 -- Per-season scoreboard. Points columns are written only by the scoring
--- function / worker; users may only touch golden_boot_pick (column grants below).
+-- function / worker; users may touch pick-related columns (column grants below):
+-- golden_boot_pick, golden_boot_goals_prediction, yellow_card_pick, yellow_card_pick_count,
+-- red_card_pick, red_card_pick_count
 create table public.user_season_stats (
   user_id          uuid not null references public.users (id) on delete cascade,
   season_id        uuid not null references public.seasons (id) on delete cascade,
   total_points     integer not null default 0,
   exact_hits       integer not null default 0,
   golden_boot_pick uuid references public.players (id),
-  golden_boot_pick_count integer,
+  golden_boot_goals_prediction integer,
   golden_boot_hit  boolean,                      -- resolved by close_season()
   yellow_card_pick uuid references public.players(id),
   yellow_card_pick_count integer,
@@ -270,6 +272,8 @@ begin
     top_yellow integer;
     top_red integer;
   begin
+    -- NOTE: Ties are handled correctly - if multiple players share the top count,
+    -- users who picked ANY of them will receive points
     select max(goals) into top_goals from players where season_id = p_season_id;
     select max(yellow_cards) into top_yellow from players where season_id = p_season_id;
     select max(red_cards) into top_red from players where season_id = p_season_id;
@@ -293,7 +297,7 @@ begin
       + coalesce((
           select case
             when uss.golden_boot_pick is null then 0
-            when p.goals = uss.golden_boot_pick_count and p.goals = top_goals and top_goals > 0 then 4
+            when p.goals = uss.golden_boot_goals_prediction and p.goals = top_goals and top_goals > 0 then 4
             when p.goals = top_goals and top_goals > 0 then 2
             else 0
           end
@@ -442,15 +446,11 @@ grant insert (user_id, match_id, home_score_guess, away_score_guess),
       update (home_score_guess, away_score_guess)
   on public.predictions to authenticated;
 
-grant insert (user_id, season_id, golden_boot_pick),
-      update (golden_boot_pick)
-  on public.user_season_stats to authenticated;
-
--- Allow users to also provide their count guesses for boot/cards and card picks
-grant insert (user_id, season_id, golden_boot_pick, golden_boot_pick_count,
+-- Allow users to provide pick players and count guesses for boot/cards
+grant insert (user_id, season_id, golden_boot_pick, golden_boot_goals_prediction,
               yellow_card_pick, yellow_card_pick_count,
               red_card_pick, red_card_pick_count),
-      update (golden_boot_pick, golden_boot_pick_count,
+      update (golden_boot_pick, golden_boot_goals_prediction,
               yellow_card_pick, yellow_card_pick_count,
               red_card_pick, red_card_pick_count)
   on public.user_season_stats to authenticated;

@@ -230,7 +230,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
         players: players,
         currentPick: currentPick,
         isLocked: _isBootLocked,
-        currentGoalsPrediction: isMen ? (_profile?.goldenBootPickCount) : (_profile?.goldenBootPickCount),
+        currentGoalsPrediction: _profile?.goldenBootPickCount,
       ),
     );
 

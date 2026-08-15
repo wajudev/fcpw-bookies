@@ -76,7 +76,7 @@ class PlayersService {
             .from('user_season_stats')
             .update({
               column: playerId,
-              if (predictedGoals != null) 'golden_boot_pick_count': predictedGoals,
+              if (predictedGoals != null) 'golden_boot_goals_prediction': predictedGoals,
             })
             .eq('user_id', userId)
             .eq('season_id', seasonId);
@@ -89,7 +89,7 @@ class PlayersService {
           column: playerId,
           'total_points': 0,
           'exact_hits': 0,
-          if (predictedGoals != null) 'golden_boot_pick_count': predictedGoals,
+          if (predictedGoals != null) 'golden_boot_goals_prediction': predictedGoals,
         });
       }
 
@@ -224,7 +224,7 @@ class PlayersService {
 
       if (existing != null) {
         // Update
-        final updatePayload = {column: playerId};
+        final updatePayload = <String, dynamic>{column: playerId};
         if (predictedCount != null) {
           updatePayload[ type == 'yellow' ? 'yellow_card_pick_count' : 'red_card_pick_count' ] = predictedCount;
         }
@@ -235,7 +235,7 @@ class PlayersService {
             .eq('season_id', seasonId);
       } else {
         // Insert
-        final insertPayload = {
+        final insertPayload = <String, dynamic>{
           'user_id': userId,
           'season_id': seasonId,
           column: playerId,
