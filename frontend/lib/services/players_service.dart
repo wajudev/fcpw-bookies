@@ -76,7 +76,7 @@ class PlayersService {
             .from('user_season_stats')
             .update({
               column: playerId,
-              if (predictedGoals != null && gender == 'M') 'golden_boot_goals_prediction': predictedGoals,
+              if (predictedGoals != null) 'golden_boot_goals_prediction': predictedGoals,
             })
             .eq('user_id', userId)
             .eq('season_id', seasonId);
@@ -89,7 +89,7 @@ class PlayersService {
           column: playerId,
           'total_points': 0,
           'exact_hits': 0,
-          if (predictedGoals != null && gender == 'M') 'golden_boot_goals_prediction': predictedGoals,
+          if (predictedGoals != null) 'golden_boot_goals_prediction': predictedGoals,
         });
       }
 
@@ -208,6 +208,7 @@ class PlayersService {
     required String seasonId,
     required String playerId,
     required String type, // 'yellow' or 'red'
+    int? predictedCount,
   }) async {
     try {
       final column = type == 'yellow' ? 'yellow_card_pick' : 'red_card_pick';
@@ -223,20 +224,28 @@ class PlayersService {
 
       if (existing != null) {
         // Update
+        final updatePayload = <String, dynamic>{column: playerId};
+        if (predictedCount != null) {
+          updatePayload[ type == 'yellow' ? 'yellow_card_pick_count' : 'red_card_pick_count' ] = predictedCount;
+        }
         await _supabase
             .from('user_season_stats')
-            .update({column: playerId})
+            .update(updatePayload)
             .eq('user_id', userId)
             .eq('season_id', seasonId);
       } else {
         // Insert
-        await _supabase.from('user_season_stats').insert({
+        final insertPayload = <String, dynamic>{
           'user_id': userId,
           'season_id': seasonId,
           column: playerId,
           'total_points': 0,
           'exact_hits': 0,
-        });
+        };
+        if (predictedCount != null) {
+          insertPayload[ type == 'yellow' ? 'yellow_card_pick_count' : 'red_card_pick_count' ] = predictedCount;
+        }
+        await _supabase.from('user_season_stats').insert(insertPayload);
       }
 
       debugPrint('Card pick saved successfully');

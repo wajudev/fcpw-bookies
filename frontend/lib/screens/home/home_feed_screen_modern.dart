@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../services/matches_service.dart';
 import '../../services/leaderboard_service.dart';
 import '../../services/players_service.dart';
+import '../../services/profile_service.dart';
 import '../../services/standings_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/snackbar_helper.dart';
@@ -38,9 +39,11 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
   final _matchesService = MatchesService();
   final _leaderboardService = LeaderboardService();
   final _playersService = PlayersService();
+  final _profileService = ProfileService();
   final _standingsService = StandingsService();
 
   String? _seasonId;
+  UserProfile? _profile;
   List<Match> _nextMatchweekGames = [];
   int _currentMatchweek = 1;
   Map<String, Prediction> _predictions = {};
@@ -132,6 +135,9 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
     final predictions =
         await _matchesService.getUserPredictions(userId, seasonId);
 
+    // Fetch user profile to get pick counts and hits
+    final profile = await _profileService.getUserProfile(userId, seasonId);
+
     // Fetch real leaderboard data
     final leaderboard = await _leaderboardService.getLeaderboard(seasonId, limit: 5);
     final topUsers = leaderboard
@@ -189,6 +195,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
 
     setState(() {
       _seasonId = seasonId;
+      _profile = profile;
       _nextMatchweekGames = nextMatchweekGames;
       _currentMatchweek = currentMatchweek;
       _predictions = predictions;
@@ -223,7 +230,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
         players: players,
         currentPick: currentPick,
         isLocked: _isBootLocked,
-        currentGoalsPrediction: isMen ? null : null, // Only men have goal prediction
+        currentGoalsPrediction: _profile?.goldenBootPickCount,
       ),
     );
 
@@ -271,18 +278,22 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
         players: _allPlayers,
         currentPick: currentPick,
         isLocked: _isBootLocked,
+        countLabel: isYellow ? 'Predicted yellow cards' : 'Predicted red cards',
+        currentGoalsPrediction: isYellow ? _profile?.yellowCardPickCount : _profile?.redCardPickCount,
       ),
     );
 
     if (result != null && mounted) {
       try {
         final player = result['player'] as Player;
+        final predictedCount = result['predictedGoals'] as int?;
 
         await _playersService.submitCardPick(
           userId: _authService.currentUser!.id,
           seasonId: _seasonId!,
           playerId: player.id,
           type: type,
+          predictedCount: predictedCount,
         );
 
         if (mounted) {

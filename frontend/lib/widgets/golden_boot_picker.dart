@@ -7,6 +7,7 @@ class GoldenBootPicker extends StatefulWidget {
   final List<Player> players;
   final Player? currentPick;
   final int? currentGoalsPrediction;
+  final String? countLabel; // label for generic count input (goals/cards)
   final bool isLocked;
 
   const GoldenBootPicker({
@@ -14,6 +15,7 @@ class GoldenBootPicker extends StatefulWidget {
     required this.players,
     this.currentPick,
     this.currentGoalsPrediction,
+    this.countLabel,
     this.isLocked = false,
   });
 
@@ -251,7 +253,7 @@ class _GoldenBootPickerState extends State<GoldenBootPicker> {
                     ),
             ),
 
-            // Goals prediction
+            // Count prediction (goals or cards)
             if (!widget.isLocked && _selectedPlayer != null) ...[
               const SizedBox(height: 16),
               Container(
@@ -263,9 +265,9 @@ class _GoldenBootPickerState extends State<GoldenBootPicker> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'How many goals will this player score?',
-                      style: TextStyle(
+                    Text(
+                      widget.countLabel ?? 'How many goals will this player score?',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: AppTheme.textPrimary,
@@ -281,7 +283,11 @@ class _GoldenBootPickerState extends State<GoldenBootPicker> {
                       ],
                       decoration: InputDecoration(
                         hintText: 'e.g. 15',
-                        suffixText: 'Goals',
+                        suffixText: widget.countLabel != null && 
+                                    (widget.countLabel!.toLowerCase().contains('yellow') || 
+                                     widget.countLabel!.toLowerCase().contains('red') ||
+                                     widget.countLabel!.toLowerCase().contains('goal'))
+                                    ? 'Cards' : 'Goals',
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(

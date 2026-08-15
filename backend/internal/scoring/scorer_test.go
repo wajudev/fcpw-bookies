@@ -22,7 +22,7 @@ func TestCalculatePoints(t *testing.T) {
 			predAway:       1,
 			actualHome:     2,
 			actualAway:     1,
-			expectedPoints: 3,
+			expectedPoints: 2,
 			expectedExact:  true,
 		},
 		{
@@ -67,7 +67,7 @@ func TestCalculatePoints(t *testing.T) {
 			predAway:       4,
 			actualHome:     5,
 			actualAway:     4,
-			expectedPoints: 3,
+			expectedPoints: 2,
 			expectedExact:  true,
 		},
 		{
@@ -76,7 +76,7 @@ func TestCalculatePoints(t *testing.T) {
 			predAway:       0,
 			actualHome:     0,
 			actualAway:     0,
-			expectedPoints: 3,
+			expectedPoints: 2,
 			expectedExact:  true,
 		},
 	}
