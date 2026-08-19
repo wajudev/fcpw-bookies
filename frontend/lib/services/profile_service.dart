@@ -6,16 +6,16 @@ class ProfileService {
 
   Future<UserProfile?> getUserProfile(String userId, String seasonId) async {
     try {
-      // Get user info
+      // Get user info from public.users (maintained by auth trigger)
       final userResponse = await _supabase
-          .from('profiles')
+          .from('users')
           .select('username')
           .eq('id', userId)
           .maybeSingle();
 
-      // If no profile exists, return null
+      // If no user exists, return null
       if (userResponse == null) {
-        debugPrint('No profile found for user $userId');
+        debugPrint('No user found for user $userId');
         return null;
       }
 

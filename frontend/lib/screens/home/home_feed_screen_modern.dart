@@ -512,6 +512,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
                       HoverScaleWidget(
                         child: LeaderboardWidget(
                           topUsers: _topUsers.take(5).toList(),
+                          maxDisplay: 5,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -538,6 +539,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
                       child: HoverScaleWidget(
                         child: LeaderboardWidget(
                           topUsers: _topUsers.take(5).toList(),
+                          maxDisplay: 5,
                         ),
                       ),
                     ),

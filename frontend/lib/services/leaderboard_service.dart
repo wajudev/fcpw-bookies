@@ -24,10 +24,13 @@ class LeaderboardService {
       {int limit = 10}) async {
     try {
       // Get all users with their stats (LEFT JOIN so users without stats show with 0)
+      debugPrint('🔍 Leaderboard query with limit: $limit');
       final response = await _supabase
           .from('users')
           .select('id, username, user_season_stats!left(total_points, exact_hits)')
           .limit(limit);
+
+      debugPrint('📊 Response count: ${(response as List).length}');
 
       final entries = <LeaderboardEntry>[];
       for (var i = 0; i < (response as List).length; i++) {

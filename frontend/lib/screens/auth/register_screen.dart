@@ -81,20 +81,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Log technical error for debugging
       debugPrint('Registration error: $e');
 
-      // Show user-friendly message
+      // Show user-friendly message based on error type
       setState(() {
-        if (e.toString().contains('SocketFailed') ||
-            e.toString().contains('host lookup')) {
+        final errorStr = e.toString().toLowerCase();
+
+        // Network errors
+        if (errorStr.contains('socketfailed') || errorStr.contains('host lookup') ||
+            errorStr.contains('network') || errorStr.contains('connection refused')) {
           _errorMessage = 'Keine Verbindung zum Server. Bitte Internetverbindung prüfen.';
-        } else if (e.toString().contains('User already registered')) {
-          _errorMessage = 'Email bereits registriert.';
-        } else if (e.toString().contains('duplicate key') ||
-                   e.toString().contains('unique constraint')) {
-          _errorMessage = 'Benutzername bereits vergeben.';
-        } else if (e.toString().contains('Password should be')) {
-          _errorMessage = 'Passwort zu schwach. Mindestens 6 Zeichen.';
-        } else {
-          _errorMessage = 'Registrierung fehlgeschlagen. Bitte erneut versuchen.';
+        }
+        // Email already exists
+        else if (errorStr.contains('user already registered') ||
+                 errorStr.contains('email already in use') ||
+                 errorStr.contains('duplicate') && errorStr.contains('email')) {
+          _errorMessage = 'Diese E-Mail ist bereits registriert. Bitte einloggen oder andere E-Mail verwenden.';
+        }
+        // Username already taken
+        else if (errorStr.contains('duplicate key') || errorStr.contains('unique constraint') ||
+                 (errorStr.contains('username') && errorStr.contains('already'))) {
+          _errorMessage = 'Benutzername bereits vergeben. Bitte anderen wählen.';
+        }
+        // Password validation errors
+        else if (errorStr.contains('password should be') || errorStr.contains('password must be')) {
+          if (errorStr.contains('6')) {
+            _errorMessage = 'Passwort zu kurz. Mindestens 6 Zeichen erforderlich.';
+          } else if (errorStr.contains('72')) {
+            _errorMessage = 'Passwort zu lang. Maximal 72 Zeichen erlaubt.';
+          } else {
+            _errorMessage = 'Passwort erfüllt nicht die Anforderungen. Mindestens 6 Zeichen.';
+          }
+        }
+        // Invalid email format
+        else if (errorStr.contains('invalid') && errorStr.contains('email')) {
+          _errorMessage = 'Ungültige E-Mail-Adresse. Bitte korrektes Format verwenden.';
+        }
+        // Username validation errors
+        else if (errorStr.contains('username') && (errorStr.contains('invalid') ||
+                 errorStr.contains('char_length') || errorStr.contains('regex'))) {
+          _errorMessage = 'Benutzername ungültig. 3-20 Zeichen, nur Buchstaben, Zahlen und Unterstrich erlaubt.';
+        }
+        // Rate limiting
+        else if (errorStr.contains('rate limit') || errorStr.contains('too many')) {
+          _errorMessage = 'Zu viele Versuche. Bitte in einigen Minuten erneut versuchen.';
+        }
+        // Email confirmation timeout
+        else if (errorStr.contains('confirmation') || errorStr.contains('verify')) {
+          _errorMessage = 'E-Mail-Bestätigung erforderlich. Bitte überprüfe dein Postfach.';
+        }
+        // Generic fallback with hint to check logs
+        else {
+          _errorMessage = 'Registrierung fehlgeschlagen. Bitte Eingaben überprüfen und erneut versuchen.';
+          debugPrint('⚠️ Unhandled registration error: $e');
         }
       });
     } finally {

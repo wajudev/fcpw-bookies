@@ -4,11 +4,13 @@ import '../theme/app_theme.dart';
 class LeaderboardWidget extends StatelessWidget {
   final List<({String username, int points, int rank})> topUsers;
   final VoidCallback? onViewAll;
+  final int? maxDisplay; // null = show all
 
   const LeaderboardWidget({
     super.key,
     required this.topUsers,
     this.onViewAll,
+    this.maxDisplay,
   });
 
   @override
@@ -91,7 +93,7 @@ class LeaderboardWidget extends StatelessWidget {
               ),
             )
           else ...[
-            ...topUsers.take(5).map((user) => _buildUserRow(user)),
+            ...(maxDisplay != null ? topUsers.take(maxDisplay!) : topUsers).map((user) => _buildUserRow(user)),
             const SizedBox(height: 16),
           ],
         ],
