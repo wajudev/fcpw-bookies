@@ -248,14 +248,32 @@ class _DeadlineReminderSlideState extends State<DeadlineReminderSlide> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                DateHelper.getCountdownWithIndicator(deadline),
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(int.parse(
+                        DateHelper.getDeadlineColorHex(deadline).substring(1),
+                        radix: 16,
+                      ) + 0xFF000000),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    DateHelper.getCountdownWithIndicator(deadline),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 2),
               Text(
                 'noch',
                 style: TextStyle(

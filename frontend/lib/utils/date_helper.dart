@@ -45,27 +45,37 @@ class DateHelper {
     }
   }
 
-  /// Get countdown with emoji indicator
+  /// Get countdown with indicator (returns time string only)
   static String getCountdownWithIndicator(DateTime deadline) {
     final now = DateTime.now();
     final difference = deadline.difference(now);
 
     if (difference.isNegative) {
-      return '🔒 Abgelaufen';
+      return 'Abgelaufen';
     }
 
     final hours = difference.inHours;
     final showSeconds = hours < 1;
-    final timeStr = getTimeRemaining(deadline, showSeconds: showSeconds);
+    return getTimeRemaining(deadline, showSeconds: showSeconds);
+  }
+
+  /// Get color for deadline urgency indicator
+  static String getDeadlineColorHex(DateTime deadline) {
+    final now = DateTime.now();
+    final difference = deadline.difference(now);
+
+    if (difference.isNegative) {
+      return '#EF4444'; // Red for expired
+    }
+
+    final hours = difference.inHours;
 
     if (hours < 1) {
-      return '🔴 $timeStr'; // Red - urgent (< 1 hour)
+      return '#EF4444'; // Red - urgent (< 1 hour)
     } else if (hours <= 2) {
-      return '🟡 $timeStr'; // Yellow - soon (1-2 hours)
-    } else if (hours <= 24) {
-      return '🟢 $timeStr'; // Green - today
+      return '#F59E0B'; // Amber - soon (1-2 hours)
     } else {
-      return '🟢 $timeStr'; // Green - plenty of time
+      return '#10B981'; // Green - plenty of time
     }
   }
 
