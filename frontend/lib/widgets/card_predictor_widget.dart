@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/player_model.dart';
+import '../utils/date_helper.dart';
 
-class CardPredictorWidget extends StatelessWidget {
+class CardPredictorWidget extends StatefulWidget {
   final Player? yellowCardPick;
   final Player? redCardPick;
   final bool isLocked;
+  final DateTime? bootLockTime;
   final VoidCallback onTapYellow;
   final VoidCallback onTapRed;
 
@@ -13,9 +16,46 @@ class CardPredictorWidget extends StatelessWidget {
     this.yellowCardPick,
     this.redCardPick,
     required this.isLocked,
+    this.bootLockTime,
     required this.onTapYellow,
     required this.onTapRed,
   });
+
+  @override
+  State<CardPredictorWidget> createState() => _CardPredictorWidgetState();
+}
+
+class _CardPredictorWidgetState extends State<CardPredictorWidget> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    if (widget.bootLockTime == null || widget.isLocked) return;
+
+    final now = DateTime.now();
+    final timeUntilDeadline = widget.bootLockTime!.difference(now);
+
+    if (timeUntilDeadline.isNegative) return;
+
+    final updateInterval = timeUntilDeadline.inHours < 1
+        ? const Duration(seconds: 1)
+        : const Duration(minutes: 1);
+
+    _timer = Timer.periodic(updateInterval, (_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +111,8 @@ class CardPredictorWidget extends StatelessWidget {
             _buildPickCard(
               context: context,
               title: "Most Yellows",
-              currentPick: yellowCardPick,
-              onTap: onTapYellow,
+              currentPick: widget.yellowCardPick,
+              onTap: widget.onTapYellow,
               color: Colors.yellow,
               icon: '🟨',
             ),
@@ -83,15 +123,15 @@ class CardPredictorWidget extends StatelessWidget {
             _buildPickCard(
               context: context,
               title: "Most Reds",
-              currentPick: redCardPick,
-              onTap: onTapRed,
+              currentPick: widget.redCardPick,
+              onTap: widget.onTapRed,
               color: Colors.red,
               icon: '🟥',
             ),
 
-            // Lock status
-            if (isLocked) ...[
-              const SizedBox(height: 12),
+            // Deadline/Lock status
+            const SizedBox(height: 12),
+            if (widget.isLocked)
               Row(
                 children: [
                   Icon(
@@ -108,8 +148,40 @@ class CardPredictorWidget extends StatelessWidget {
                     ),
                   ),
                 ],
+              )
+            else if (widget.bootLockTime != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.timer,
+                      size: 14,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Noch ${DateHelper.getTimeRemaining(
+                        widget.bootLockTime!,
+                        showSeconds: widget.bootLockTime!.difference(DateTime.now()).inHours < 1,
+                      )}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
           ],
         ),
       ),
@@ -124,6 +196,7 @@ class CardPredictorWidget extends StatelessWidget {
     required Color color,
     required String icon,
   }) {
+    final isLocked = widget.isLocked;
     return GestureDetector(
       onTap: onTap,
       child: Container(

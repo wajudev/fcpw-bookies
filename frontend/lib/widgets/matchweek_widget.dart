@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/match_model.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_helper.dart';
 
 class MatchweekWidget extends StatelessWidget {
   final int matchweekNumber;
@@ -179,6 +180,20 @@ class MatchweekWidget extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
+                  // Deadline indicator
+                  if (match.status == MatchStatus.upcoming) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      DateHelper.getTimeRemaining(
+                        DateHelper.getMatchDeadline(match.kickoffTime),
+                      ),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white.withOpacity(0.6),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],

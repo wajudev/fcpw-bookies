@@ -20,6 +20,24 @@ class MatchesService {
     }
   }
 
+  Future<DateTime?> getBootLockTime(String seasonId) async {
+    try {
+      final response = await _supabase
+          .from('seasons')
+          .select('boot_lock_time')
+          .eq('id', seasonId)
+          .maybeSingle();
+
+      if (response?['boot_lock_time'] != null) {
+        return DateTime.parse(response!['boot_lock_time'] as String);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching boot lock time: $e');
+      return null;
+    }
+  }
+
   Future<List<Match>> getMatchesForSquad(String seasonId, String squad) async {
     try {
       final response = await _supabase

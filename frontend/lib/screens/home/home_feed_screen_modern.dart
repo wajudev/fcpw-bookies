@@ -24,6 +24,7 @@ import '../../widgets/auto_carousel_widget.dart';
 import '../../widgets/all_tables_slide.dart';
 import '../../widgets/fun_stats_slide.dart';
 import '../../widgets/league_table_widget.dart';
+import '../../widgets/deadline_reminder_slide.dart';
 
 class HomeFeedScreenModern extends StatefulWidget {
   final VoidCallback? onNavigateToMatches;
@@ -61,6 +62,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
   List<TeamStanding> _reserveStandings = [];
   List<TeamStanding> _womenStandings = [];
   bool _isBootLocked = false;
+  DateTime? _bootLockTime;
   bool _isLoading = true;
 
   @override
@@ -151,6 +153,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
     // Fetch players and predictions
     final players = await _playersService.getPlayersForSeason(seasonId);
     final bootLocked = await _playersService.isGoldenBootLocked(seasonId);
+    final bootLockTime = await _matchesService.getBootLockTime(seasonId);
 
     // Get golden boot picks
     final bootPickMenId = await _playersService.getGoldenBootPick(userId, seasonId, gender: 'M');
@@ -213,6 +216,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
       _reserveStandings = reserveStandings;
       _womenStandings = womenStandings;
       _isBootLocked = bootLocked;
+      _bootLockTime = bootLockTime;
       _isLoading = false;
     });
   }
@@ -384,10 +388,27 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
 
           // Auto-rotating carousel (Matchweek, Tables, Fun Stats)
           SizedBox(
-            height: 580,
+            height: 640,
             child: AutoCarouselWidget(
               interval: const Duration(seconds: 20),
               slides: [
+                // Slide 0: Deadline Reminder (if applicable)
+                DeadlineReminderSlide(
+                  bootLockTime: _bootLockTime,
+                  upcomingMatches: _nextMatchweekGames
+                      .map((m) => (
+                            kickoff: m.kickoffTime,
+                            homeTeam: m.homeTeam,
+                            awayTeam: m.awayTeam,
+                          ))
+                      .toList(),
+                  onTapSeasonPicks: () {
+                    // Scroll to Golden Boot section
+                    // TODO: Implement smooth scroll to section
+                  },
+                  onTapMatches: widget.onNavigateToMatches,
+                ),
+
                 // Slide 1: Matchweek (full)
                 if (_nextMatchweekGames.isNotEmpty)
                   Column(
@@ -451,6 +472,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
                           menPick: _goldenBootPickMen,
                           womenPick: _goldenBootPickWomen,
                           isLocked: _isBootLocked,
+                          bootLockTime: _bootLockTime,
                           onTapMen: () => _showGoldenBootPicker('M'),
                           onTapWomen: () => _showGoldenBootPicker('F'),
                         ),
@@ -461,6 +483,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
                           yellowCardPick: _yellowCardPick,
                           redCardPick: _redCardPick,
                           isLocked: _isBootLocked,
+                          bootLockTime: _bootLockTime,
                           onTapYellow: () => _showCardPicker('yellow'),
                           onTapRed: () => _showCardPicker('red'),
                         ),
@@ -477,6 +500,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
                           menPick: _goldenBootPickMen,
                           womenPick: _goldenBootPickWomen,
                           isLocked: _isBootLocked,
+                          bootLockTime: _bootLockTime,
                           onTapMen: () => _showGoldenBootPicker('M'),
                           onTapWomen: () => _showGoldenBootPicker('F'),
                         ),
@@ -489,6 +513,7 @@ class _HomeFeedScreenModernState extends State<HomeFeedScreenModern> {
                           yellowCardPick: _yellowCardPick,
                           redCardPick: _redCardPick,
                           isLocked: _isBootLocked,
+                          bootLockTime: _bootLockTime,
                           onTapYellow: () => _showCardPicker('yellow'),
                           onTapRed: () => _showCardPicker('red'),
                         ),

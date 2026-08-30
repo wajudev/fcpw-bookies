@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../models/match_model.dart';
 import '../theme/app_theme.dart';
 import '../utils/validators.dart';
+import '../utils/date_helper.dart';
 
 class PredictionDialog extends StatefulWidget {
   final Match match;
@@ -130,6 +131,53 @@ class _PredictionDialogState extends State<PredictionDialog> {
                 color: AppTheme.textSecondary,
               ),
             ),
+            // Deadline indicator
+            if (!isFinished && widget.match.status == MatchStatus.upcoming) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isLocked
+                      ? Colors.red.shade50
+                      : Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isLocked
+                        ? Colors.red.shade200
+                        : Colors.orange.shade200,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isLocked ? Icons.lock : Icons.timer,
+                      size: 16,
+                      color: isLocked
+                          ? Colors.red.shade700
+                          : Colors.orange.shade700,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isLocked
+                          ? 'Deadline abgelaufen'
+                          : () {
+                              final deadline = DateHelper.getMatchDeadline(widget.match.kickoffTime);
+                              final showSeconds = deadline.difference(DateTime.now()).inHours < 1;
+                              return 'Noch ${DateHelper.getTimeRemaining(deadline, showSeconds: showSeconds)}';
+                            }(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isLocked
+                            ? Colors.red.shade900
+                            : Colors.orange.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
 
             // Teams and scores

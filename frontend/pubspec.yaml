@@ -45,6 +45,8 @@ dependencies:
   # UI utilities
   intl: ^0.20.2  # Date formatting
   table_calendar: ^3.1.2  # Calendar widget
+  flutter_markdown: ^0.7.4+1  # Markdown rendering
+  url_launcher: ^6.3.1  # Open external links
 
   # Environment variables
   flutter_dotenv: ^5.1.0
@@ -75,9 +77,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # Load .env file
+  # Load .env file and documentation
   assets:
     - .env
+    - assets/BENUTZERHANDBUCH.md
+    - assets/DATENSCHUTZ.md
 
   # To add assets to your application, add an assets section, like this:
   # assets:

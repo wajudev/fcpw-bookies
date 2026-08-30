@@ -5,6 +5,8 @@ import '../../services/matches_service.dart';
 import '../../services/players_service.dart';
 import '../../services/profile_service.dart';
 import '../../theme/app_theme.dart';
+import '../info/rules_screen.dart';
+import '../info/privacy_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -206,11 +208,120 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                       const SizedBox(height: 12),
                       ..._history.map((season) => _buildHistoryCard(season)),
+                      const SizedBox(height: 20),
                     ],
+
+                    // Info Section
+                    const Text(
+                      'Informationen',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Rules Button
+                    _buildInfoButton(
+                      icon: Icons.menu_book,
+                      title: 'Spielregeln & Anleitung',
+                      subtitle: 'Wie funktioniert das Spiel?',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RulesScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Privacy Button
+                    _buildInfoButton(
+                      icon: Icons.privacy_tip,
+                      title: 'Datenschutz',
+                      subtitle: 'Wie werden deine Daten geschützt?',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PrivacyScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildInfoButton({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.cardWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryPurple.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: AppTheme.primaryPurple,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.grey,
+              size: 24,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

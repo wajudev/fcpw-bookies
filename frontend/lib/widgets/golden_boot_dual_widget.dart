@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/player_model.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_helper.dart';
 
-class GoldenBootDualWidget extends StatelessWidget {
+class GoldenBootDualWidget extends StatefulWidget {
   final Player? menPick;
   final Player? womenPick;
   final bool isLocked;
+  final DateTime? bootLockTime;
   final VoidCallback onTapMen;
   final VoidCallback onTapWomen;
 
@@ -14,9 +17,46 @@ class GoldenBootDualWidget extends StatelessWidget {
     this.menPick,
     this.womenPick,
     required this.isLocked,
+    this.bootLockTime,
     required this.onTapMen,
     required this.onTapWomen,
   });
+
+  @override
+  State<GoldenBootDualWidget> createState() => _GoldenBootDualWidgetState();
+}
+
+class _GoldenBootDualWidgetState extends State<GoldenBootDualWidget> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    if (widget.bootLockTime == null || widget.isLocked) return;
+
+    final now = DateTime.now();
+    final timeUntilDeadline = widget.bootLockTime!.difference(now);
+
+    if (timeUntilDeadline.isNegative) return;
+
+    final updateInterval = timeUntilDeadline.inHours < 1
+        ? const Duration(seconds: 1)
+        : const Duration(minutes: 1);
+
+    _timer = Timer.periodic(updateInterval, (_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,8 +127,8 @@ class GoldenBootDualWidget extends StatelessWidget {
                 _buildPickCard(
                   context: context,
                   title: "Men's Top Scorer",
-                  currentPick: menPick,
-                  onTap: onTapMen,
+                  currentPick: widget.menPick,
+                  onTap: widget.onTapMen,
                   icon: Icons.male,
                 ),
 
@@ -98,14 +138,14 @@ class GoldenBootDualWidget extends StatelessWidget {
                 _buildPickCard(
                   context: context,
                   title: "Women's Top Scorer",
-                  currentPick: womenPick,
-                  onTap: onTapWomen,
+                  currentPick: widget.womenPick,
+                  onTap: widget.onTapWomen,
                   icon: Icons.female,
                 ),
 
-                // Lock status
-                if (isLocked) ...[
-                  const SizedBox(height: 12),
+                // Deadline/Lock status
+                const SizedBox(height: 12),
+                if (widget.isLocked)
                   Row(
                     children: [
                       Icon(
@@ -122,8 +162,40 @@ class GoldenBootDualWidget extends StatelessWidget {
                         ),
                       ),
                     ],
+                  )
+                else if (widget.bootLockTime != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.timer,
+                          size: 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Noch ${DateHelper.getTimeRemaining(
+                            widget.bootLockTime!,
+                            showSeconds: widget.bootLockTime!.difference(DateTime.now()).inHours < 1,
+                          )}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
               ],
             ),
           ),
@@ -139,6 +211,7 @@ class GoldenBootDualWidget extends StatelessWidget {
     required VoidCallback onTap,
     required IconData icon,
   }) {
+    final isLocked = widget.isLocked;
     return GestureDetector(
       onTap: onTap,
       child: Container(
